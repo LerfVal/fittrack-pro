@@ -1,4 +1,4 @@
-import { Workout } from "@/types";
+import { Workout } from "@/app/types";
 
 interface RecentWorkoutsProps {
   workouts: Workout[];
@@ -50,7 +50,9 @@ export default function RecentWorkouts({ workouts }: RecentWorkoutsProps) {
               </div>
               <div>
                 <p className="text-xs text-zinc-500 mb-0.5">Exercises</p>
-                <p className="text-sm font-semibold text-white">{w.exercises}</p>
+                <p className="text-sm font-semibold text-white">
+                  {w.exercises}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-zinc-500 mb-0.5">Volume</p>
