@@ -33,7 +33,7 @@ export default function LoginPage() {
       // fetch() makes an HTTP request to our Express server.
       // We send the email and password as JSON in the request body.
       const res = await fetch(
-        "${process.env.NEXT_PUBLIC_API_URL}/api/auth/login",
+        "process.env.NEXT_PUBLIC_API_URL/api/auth/login",
         {
           method: "POST",
           headers: {
