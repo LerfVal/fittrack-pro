@@ -75,15 +75,15 @@ export default function DashboardPage() {
       try {
         // Fire all three requests at the same time
         const [summaryRes, workoutsRes, progressRes] = await Promise.all([
-          fetch("http://localhost:5000/api/stats/summary", {
+          fetch("${process.env.NEXT_PUBLIC_API_URL}/api/stats/summary", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("http://localhost:5000/api/workouts", {
+          fetch("${process.env.NEXT_PUBLIC_API_URL}/api/workouts", {
             headers: { Authorization: `Bearer ${token}` },
           }),
           // exercise_id 1 = Bench Press (our first seeded exercise)
           // TODO: make this dynamic so user can pick which exercise to track
-          fetch("http://localhost:5000/api/stats/progress/1", {
+          fetch("${process.env.NEXT_PUBLIC_API_URL}/api/stats/progress/1", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

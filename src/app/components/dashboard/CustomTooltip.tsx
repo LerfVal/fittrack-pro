@@ -1,6 +1,10 @@
-import { CustomTooltipProps } from "@/types";
+import { CustomTooltipProps } from "@/app/types";
 
-export default function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+export default function CustomTooltip({
+  active,
+  payload,
+  label,
+}: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
 
   return (

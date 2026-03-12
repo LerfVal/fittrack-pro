@@ -16,11 +16,11 @@ interface Exercise {
 
 // Represents a single set within the workout logger
 interface SetEntry {
-  id: string;           // Temporary client-side ID (not the DB id) for React keys
+  id: string; // Temporary client-side ID (not the DB id) for React keys
   exercise_id: number;
   exercise_name: string;
   set_number: number;
-  reps: number | "";    // Allow empty string so the input can be cleared
+  reps: number | ""; // Allow empty string so the input can be cleared
   weight_lbs: number | "";
 }
 
@@ -46,11 +46,14 @@ export default function NewWorkoutPage() {
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/exercises", {
-          headers: {
-            Authorization: `Bearer ${token}`, // All protected routes need this header
+        const res = await fetch(
+          "${process.env.NEXT_PUBLIC_API_URL}/api/exercises",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // All protected routes need this header
+            },
           },
-        });
+        );
         if (res.ok) {
           const data = await res.json();
           setExercises(data);
@@ -68,9 +71,10 @@ export default function NewWorkoutPage() {
   // Filter exercises based on the search query.
   // This runs on every render but is cheap for small lists.
   // For large lists you'd debounce this or move it to the API.
-  const filteredExercises = exercises.filter((ex) =>
-    ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    ex.muscle_group?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredExercises = exercises.filter(
+    (ex) =>
+      ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ex.muscle_group?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // --- ADD EXERCISE ---
@@ -115,12 +119,18 @@ export default function NewWorkoutPage() {
   // --- UPDATE SET ---
   // Updates a specific field (reps or weight_lbs) on a specific set.
   // We identify the set by its temporary client-side id.
-  const updateSet = (id: string, field: "reps" | "weight_lbs", value: string) => {
-    setSets(sets.map((s) =>
-      s.id === id
-        ? { ...s, [field]: value === "" ? "" : parseFloat(value) }
-        : s
-    ));
+  const updateSet = (
+    id: string,
+    field: "reps" | "weight_lbs",
+    value: string,
+  ) => {
+    setSets(
+      sets.map((s) =>
+        s.id === id
+          ? { ...s, [field]: value === "" ? "" : parseFloat(value) }
+          : s,
+      ),
+    );
   };
 
   // --- REMOVE SET ---
@@ -130,7 +140,9 @@ export default function NewWorkoutPage() {
 
     // Renumber sets for each exercise so they stay sequential (1, 2, 3...)
     const renumbered = filtered.map((s) => {
-      const setsForExercise = filtered.filter((f) => f.exercise_id === s.exercise_id);
+      const setsForExercise = filtered.filter(
+        (f) => f.exercise_id === s.exercise_id,
+      );
       return { ...s, set_number: setsForExercise.indexOf(s) + 1 };
     });
 
@@ -141,12 +153,15 @@ export default function NewWorkoutPage() {
   // Instead of rendering a flat list of sets, we group them by exercise
   // so the UI shows exercise name as a header with its sets below.
   // reduce() builds an object like: { exerciseId: [set1, set2, ...] }
-  const groupedSets = sets.reduce((groups, set) => {
-    const key = set.exercise_id;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(set);
-    return groups;
-  }, {} as Record<number, SetEntry[]>);
+  const groupedSets = sets.reduce(
+    (groups, set) => {
+      const key = set.exercise_id;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(set);
+      return groups;
+    },
+    {} as Record<number, SetEntry[]>,
+  );
 
   // --- SAVE WORKOUT ---
   // Sends the completed workout to the backend API
@@ -164,7 +179,9 @@ export default function NewWorkoutPage() {
     }
 
     // Check all sets have reps and weight filled in
-    const incompleteSets = sets.filter((s) => s.reps === "" || s.weight_lbs === "");
+    const incompleteSets = sets.filter(
+      (s) => s.reps === "" || s.weight_lbs === "",
+    );
     if (incompleteSets.length > 0) {
       setError("Please fill in reps and weight for all sets.");
       return;
@@ -173,24 +190,27 @@ export default function NewWorkoutPage() {
     setIsSaving(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/workouts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Protected route — needs JWT
+      const res = await fetch(
+        "${process.env.NEXT_PUBLIC_API_URL}/api/workouts",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Protected route — needs JWT
+          },
+          body: JSON.stringify({
+            title: title.trim(),
+            notes: notes.trim() || null,
+            // Map sets to the format the API expects
+            sets: sets.map((s) => ({
+              exercise_id: s.exercise_id,
+              set_number: s.set_number,
+              reps: s.reps,
+              weight_lbs: s.weight_lbs,
+            })),
+          }),
         },
-        body: JSON.stringify({
-          title: title.trim(),
-          notes: notes.trim() || null,
-          // Map sets to the format the API expects
-          sets: sets.map((s) => ({
-            exercise_id: s.exercise_id,
-            set_number: s.set_number,
-            reps: s.reps,
-            weight_lbs: s.weight_lbs,
-          })),
-        }),
-      });
+      );
 
       const data = await res.json();
 
@@ -201,7 +221,6 @@ export default function NewWorkoutPage() {
 
       // Success — redirect to dashboard
       router.push("/dashboard");
-
     } catch (err) {
       setError("Could not connect to the server.");
     } finally {
@@ -222,8 +241,18 @@ export default function NewWorkoutPage() {
             href="/dashboard"
             className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Back
           </Link>
@@ -231,7 +260,11 @@ export default function NewWorkoutPage() {
           {/* Page title */}
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-orange-500 flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-3.5 h-3.5 text-white"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z" />
               </svg>
             </div>
@@ -251,7 +284,6 @@ export default function NewWorkoutPage() {
 
       {/* ── MAIN CONTENT ── */}
       <div className="max-w-2xl mx-auto px-4 md:px-8 py-8">
-
         {/* Error banner */}
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-6">
@@ -284,15 +316,22 @@ export default function NewWorkoutPage() {
 
         {/* ── SETS LIST — grouped by exercise ── */}
         {Object.entries(groupedSets).map(([exerciseId, exerciseSets]) => (
-          <div key={exerciseId} className="mb-6 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-
+          <div
+            key={exerciseId}
+            className="mb-6 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden"
+          >
             {/* Exercise header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
               <div>
-                <p className="font-semibold text-white">{exerciseSets[0].exercise_name}</p>
+                <p className="font-semibold text-white">
+                  {exerciseSets[0].exercise_name}
+                </p>
                 <p className="text-xs text-zinc-500 mt-0.5">
                   {/* Find the muscle group from the exercises list */}
-                  {exercises.find((e) => e.id === parseInt(exerciseId))?.muscle_group}
+                  {
+                    exercises.find((e) => e.id === parseInt(exerciseId))
+                      ?.muscle_group
+                  }
                 </p>
               </div>
             </div>
@@ -307,8 +346,10 @@ export default function NewWorkoutPage() {
 
             {/* Individual set rows */}
             {exerciseSets.map((set) => (
-              <div key={set.id} className="grid grid-cols-12 gap-2 px-4 py-2 items-center">
-
+              <div
+                key={set.id}
+                className="grid grid-cols-12 gap-2 px-4 py-2 items-center"
+              >
                 {/* Set number badge */}
                 <div className="col-span-2">
                   <span className="w-7 h-7 rounded-lg bg-zinc-800 text-zinc-400 text-xs font-bold flex items-center justify-center">
@@ -321,7 +362,9 @@ export default function NewWorkoutPage() {
                   <input
                     type="number"
                     value={set.weight_lbs}
-                    onChange={(e) => updateSet(set.id, "weight_lbs", e.target.value)}
+                    onChange={(e) =>
+                      updateSet(set.id, "weight_lbs", e.target.value)
+                    }
                     placeholder="0"
                     min="0"
                     className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors"
@@ -346,8 +389,18 @@ export default function NewWorkoutPage() {
                     onClick={() => removeSet(set.id)}
                     className="w-7 h-7 rounded-lg bg-zinc-800 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 flex items-center justify-center transition-colors"
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -357,11 +410,26 @@ export default function NewWorkoutPage() {
             {/* Add another set for this exercise */}
             <div className="px-4 py-3 border-t border-zinc-800">
               <button
-                onClick={() => addSetToExercise(parseInt(exerciseId), exerciseSets[0].exercise_name)}
+                onClick={() =>
+                  addSetToExercise(
+                    parseInt(exerciseId),
+                    exerciseSets[0].exercise_name,
+                  )
+                }
                 className="text-orange-400 hover:text-orange-300 text-sm font-medium transition-colors flex items-center gap-1"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 Add set
               </button>
@@ -375,8 +443,18 @@ export default function NewWorkoutPage() {
             onClick={() => setShowSearch(!showSearch)}
             className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-zinc-700 hover:border-orange-500/50 text-zinc-500 hover:text-orange-400 rounded-2xl py-4 transition-all"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             <span className="font-medium">Add Exercise</span>
           </button>
@@ -384,7 +462,6 @@ export default function NewWorkoutPage() {
           {/* Search dropdown — only shown when showSearch is true */}
           {showSearch && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-2xl overflow-hidden shadow-2xl z-20">
-
               {/* Search input */}
               <div className="p-3 border-b border-zinc-800">
                 <input
@@ -398,9 +475,13 @@ export default function NewWorkoutPage() {
               </div>
 
               {/* Exercise results list */}
-              <div className="max-h-60 overflow-y-auto"> {/* Scrollable if many results */}
+              <div className="max-h-60 overflow-y-auto">
+                {" "}
+                {/* Scrollable if many results */}
                 {filteredExercises.length === 0 ? (
-                  <p className="text-zinc-500 text-sm text-center py-6">No exercises found</p>
+                  <p className="text-zinc-500 text-sm text-center py-6">
+                    No exercises found
+                  </p>
                 ) : (
                   filteredExercises.map((exercise) => (
                     <button
@@ -409,12 +490,26 @@ export default function NewWorkoutPage() {
                       className="w-full flex items-center justify-between px-4 py-3 hover:bg-zinc-800 transition-colors text-left"
                     >
                       <div>
-                        <p className="text-sm font-medium text-white">{exercise.name}</p>
-                        <p className="text-xs text-zinc-500">{exercise.muscle_group} · {exercise.equipment}</p>
+                        <p className="text-sm font-medium text-white">
+                          {exercise.name}
+                        </p>
+                        <p className="text-xs text-zinc-500">
+                          {exercise.muscle_group} · {exercise.equipment}
+                        </p>
                       </div>
                       {/* Show a + icon on hover */}
-                      <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      <svg
+                        className="w-4 h-4 text-zinc-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
                     </button>
                   ))
