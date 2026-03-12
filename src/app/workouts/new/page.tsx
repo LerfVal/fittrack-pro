@@ -47,7 +47,7 @@ export default function NewWorkoutPage() {
     const fetchExercises = async () => {
       try {
         const res = await fetch(
-          "process.env.NEXT_PUBLIC_API_URL/api/exercises",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/exercises`,
           {
             headers: {
               Authorization: `Bearer ${token}`, // All protected routes need this header
@@ -190,24 +190,27 @@ export default function NewWorkoutPage() {
     setIsSaving(true);
 
     try {
-      const res = await fetch("process.env.NEXT_PUBLIC_API_URL/api/workouts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Protected route — needs JWT
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/workouts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Protected route — needs JWT
+          },
+          body: JSON.stringify({
+            title: title.trim(),
+            notes: notes.trim() || null,
+            // Map sets to the format the API expects
+            sets: sets.map((s) => ({
+              exercise_id: s.exercise_id,
+              set_number: s.set_number,
+              reps: s.reps,
+              weight_lbs: s.weight_lbs,
+            })),
+          }),
         },
-        body: JSON.stringify({
-          title: title.trim(),
-          notes: notes.trim() || null,
-          // Map sets to the format the API expects
-          sets: sets.map((s) => ({
-            exercise_id: s.exercise_id,
-            set_number: s.set_number,
-            reps: s.reps,
-            weight_lbs: s.weight_lbs,
-          })),
-        }),
-      });
+      );
 
       const data = await res.json();
 
