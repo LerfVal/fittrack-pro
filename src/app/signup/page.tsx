@@ -76,7 +76,7 @@ export default function SignupPage() {
       // No need to make them log in again after signing up.
       login(data.token, data.user);
       router.push("/dashboard");
-    } catch (_err) {
+    } catch {
       // Network error — backend is probably not running
       setError(
         "Could not connect to the server. Make sure the backend is running.",
