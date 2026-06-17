@@ -58,7 +58,7 @@ export default function NewWorkoutPage() {
           const data = await res.json();
           setExercises(data);
         }
-      } catch (err) {
+      } catch (_err) {
         console.error("Failed to fetch exercises:", err);
       }
     };
