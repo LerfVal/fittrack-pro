@@ -46,7 +46,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true); // True while any data is loading
 
   // --- GREETING & DATE ---
-  const firstName = user?.name?.split(" ")[0] || "there";
+  const firstName = user?.name?.split(" ")[0] || "billybob";
 
   const getGreeting = () => {
     const hour = new Date().getHours();
