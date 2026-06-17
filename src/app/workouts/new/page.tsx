@@ -221,7 +221,7 @@ export default function NewWorkoutPage() {
 
       // Success — redirect to dashboard
       router.push("/dashboard");
-    } catch (err) {
+    } catch {
       setError("Could not connect to the server.");
     } finally {
       setIsSaving(false);
