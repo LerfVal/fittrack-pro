@@ -59,7 +59,7 @@ export default function NewWorkoutPage() {
           setExercises(data);
         }
       } catch {
-        console.error("Failed to fetch exercises:", err);
+        console.error("Failed to fetch exercises:", );
       }
     };
 
