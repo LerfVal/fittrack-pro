@@ -58,7 +58,7 @@ export default function LoginPage() {
 
       // Redirect to the dashboard after successful login
       router.push("/dashboard");
-    } catch (_err) {
+    } catch {
       // Catches network errors e.g. backend server is not running
       setError(
         "Could not connect to the server. Make sure the backend is running.",
